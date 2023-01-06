@@ -104,12 +104,15 @@ resource "aws_lambda_function" "sqs_processor" {
     function_name = "${var.app_env}-lambda"
     role = aws_iam_role.iam_for_terraform_lambda.arn
     handler = "main.handler"
-    runtime = "python3.8"
+    runtime = "python3.9"
     environment {
     variables = {
     	    dest_bucket = "${module.aws_s3_bucket_output.s3_bucket_id}"
         }
     }
+   layers = [
+    "arn:aws:lambda:eu-west-2:770693421928:layer:Klayers-p39-pillow:1"
+  ]
 }
 
 # CloudWatch Log Group for the Lambda function
