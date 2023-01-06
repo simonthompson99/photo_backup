@@ -42,6 +42,16 @@ module "aws_s3_bucket_output" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 
+  lifecycle_rule = [{
+
+        id      = "permanent_retention"
+        enabled = true
+
+        transition  = [{
+            days            = 1
+            storage_class   = "GLACIER"
+        }]
+    }]
 }
 
 resource "aws_kms_key" "objects" {
