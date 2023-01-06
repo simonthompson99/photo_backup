@@ -37,8 +37,10 @@ resource "aws_iam_policy" "lambda_policy" {
       ],
       "Effect": "Allow",
       "Resource": [
-        "${module.aws_s3_bucket_output.s3_bucket_arn}",
-        "${module.aws_s3_bucket_output.s3_bucket_arn}/*"
+        "${module.aws_s3_bucket_output_orig.s3_bucket_arn}",
+        "${module.aws_s3_bucket_output_orig.s3_bucket_arn}/*",
+        "${module.aws_s3_bucket_output_thumb.s3_bucket_arn}",
+        "${module.aws_s3_bucket_output_thumb.s3_bucket_arn}/*"
       ]
     },
     {
@@ -107,7 +109,8 @@ resource "aws_lambda_function" "sqs_processor" {
     runtime = "python3.9"
     environment {
     variables = {
-    	    dest_bucket = "${module.aws_s3_bucket_output.s3_bucket_id}"
+    	    dest_bucket_orig = "${module.aws_s3_bucket_output_orig.s3_bucket_id}"
+    	    dest_bucket_thumb = "${module.aws_s3_bucket_output_thumb.s3_bucket_id}"
         }
     }
    layers = [

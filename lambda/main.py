@@ -12,7 +12,8 @@ LOGGER.setLevel(logging.INFO)
 s3 = boto3.resource('s3')
 client = boto3.client('s3')
 
-DEST_BUCKET = os.environ['dest_bucket']
+DEST_BUCKET = os.environ['dest_bucket_orig']
+THUMB_BUCKET = os.environ['dest_bucket_thumb']
 
 def resize_image(image_path, resized_path):
     with Image.open(image_path) as image:
@@ -35,13 +36,17 @@ def handler(event, context):
 
                 in_bucket = s3.Bucket(s3_rec['s3']['bucket']['name'])
                 out_bucket = s3.Bucket(DEST_BUCKET)
+                thumb_bucket = s3.Bucket(THUMB_BUCKET)
+
+                
                 # key needs unquote_plus because spaces replaced with '+'
                 obj_key = unquote_plus(s3_rec['s3']['object']['key'])
+                ext = os.path.splitext(obj_key)[1]
 
                 #download to tmp folder
                 tmp_loc = f'/tmp/{uuid.uuid4()}'
                 in_bucket.download_file(obj_key, tmp_loc)
-                resize_image(tmp_loc, f'{tmp_loc}_thumb.png')
+                resize_image(tmp_loc, f'{tmp_loc}_thumb{ext}')
 
                 LOGGER.info(f"Bucket name{s3_rec['s3']['bucket']['name']}:{obj_key}")
 
@@ -51,7 +56,8 @@ def handler(event, context):
                 )
 
                 client.upload_file(
-                                    f'{tmp_loc}_thumb.png', out_bucket.name, f'{obj_key}_thumb', ExtraArgs={'ServerSideEncryption': 'aws:kms'}
+                                    f'{tmp_loc}_thumb{ext}', thumb_bucket.name,
+                                    obj_key, ExtraArgs={'ServerSideEncryption': 'aws:kms'}
                         )
 
     except Exception as e:

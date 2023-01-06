@@ -21,11 +21,11 @@ module "aws_s3_bucket" {
 
 }
 
-module "aws_s3_bucket_output" {
+module "aws_s3_bucket_output_orig" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> v2.13.0"
 
-  bucket = "${var.app_env}-output-s3-bucket"
+  bucket = "${var.app_env}-output-orig-s3-bucket"
 
   server_side_encryption_configuration = {
     rule = {
@@ -52,6 +52,29 @@ module "aws_s3_bucket_output" {
             storage_class   = "GLACIER"
         }]
     }]
+}
+
+module "aws_s3_bucket_output_thumb" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> v2.13.0"
+
+  bucket = "${var.app_env}-output-thumb-s3-bucket"
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = aws_kms_key.objects.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
+  # S3 bucket-level Public Access Block configuration
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
 }
 
 resource "aws_kms_key" "objects" {
