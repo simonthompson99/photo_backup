@@ -68,7 +68,20 @@ resource "aws_iam_policy" "lambda_policy" {
       ],
       "Effect": "Allow",
       "Resource": "${aws_kms_key.objects.arn}"
-    }
+    },
+    {
+    "Action": [
+     "dynamodb:BatchGetItem",
+     "dynamodb:GetItem",
+     "dynamodb:Query",
+     "dynamodb:Scan",
+     "dynamodb:BatchWriteItem",
+     "dynamodb:PutItem",
+     "dynamodb:UpdateItem"
+    ],
+    "Effect": "Allow",
+    "Resource": "${module.dynamodb_table.dynamodb_table_arn}"
+   }
   ]
 }
 EOF
@@ -111,6 +124,7 @@ resource "aws_lambda_function" "sqs_processor" {
     variables = {
     	    dest_bucket_orig = "${module.aws_s3_bucket_output_orig.s3_bucket_id}"
     	    dest_bucket_thumb = "${module.aws_s3_bucket_output_thumb.s3_bucket_id}"
+	    dynamo_db_table = "${module.dynamodb_table.dynamodb_table_id}"
         }
     }
    layers = [

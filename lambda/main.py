@@ -9,11 +9,13 @@ from PIL import Image
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-s3 = boto3.resource('s3')
-client = boto3.client('s3')
-
 DEST_BUCKET = os.environ['dest_bucket_orig']
 THUMB_BUCKET = os.environ['dest_bucket_thumb']
+DB_TABLE = os.environ['dynamo_db_table']
+
+s3 = boto3.resource('s3')
+client = boto3.client('s3')
+db = boto3.resource('dynamodb').Table(DB_TABLE)
 
 def resize_image(image_path, resized_path):
     with Image.open(image_path) as image:
@@ -59,6 +61,13 @@ def handler(event, context):
                                     f'{tmp_loc}_thumb{ext}', thumb_bucket.name,
                                     obj_key, ExtraArgs={'ServerSideEncryption': 'aws:kms'}
                         )
+
+                db.put_item(
+                        Item = {
+                            'object_url': obj_key,
+                            'something_else': 'here'
+                        }
+                    )
 
     except Exception as e:
 
