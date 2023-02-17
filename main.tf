@@ -19,6 +19,7 @@ resource "aws_iam_policy" "lambda_policy" {
         "s3:ListBucket",
         "s3:GetObject",
         "s3:CopyObject",
+        "s3:DeleteObject",
         "s3:HeadObject"
       ],
       "Effect": "Allow",
@@ -119,7 +120,7 @@ resource "aws_lambda_function" "sqs_processor" {
     function_name = "${var.app_env}-lambda"
     role = aws_iam_role.iam_for_terraform_lambda.arn
     handler = "main.handler"
-    runtime = "python3.9"
+    runtime = "python3.8"
     environment {
     variables = {
     	    dest_bucket_orig = "${module.aws_s3_bucket_output_orig.s3_bucket_id}"
@@ -128,7 +129,7 @@ resource "aws_lambda_function" "sqs_processor" {
         }
     }
    layers = [
-    "arn:aws:lambda:eu-west-2:770693421928:layer:Klayers-p39-pillow:1"
+    "arn:aws:lambda:eu-west-2:770693421928:layer:Klayers-p38-Pillow:6"
   ]
 }
 

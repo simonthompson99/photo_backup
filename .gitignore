@@ -4,3 +4,6 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform.lock.hcl
 .python-version
+.env
+credentials.json
+*.pickle
